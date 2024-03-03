@@ -1,0 +1,71 @@
+import React, { useState } from 'react';
+import axios from 'axios';
+import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
+
+function Register() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState(''); // Add this line
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
+
+  const register = async (e) => {
+    e.preventDefault();
+    // Reset error
+    setError('');
+
+    // Validate email
+    if (!email.includes('@')) {
+      setError('Invalid email');
+      return;
+    }
+
+    // Validate password
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters');
+      return;
+    }
+
+    // Validate confirm password
+    if (password !== confirmPassword) { // Add this block
+      setError('Passwords do not match');
+      return;
+    }
+
+    try {
+      //Call the API
+      const res = await axios.post('http://localhost:3000/register', { email, password });
+      console.log(res.data);
+      toast("User registered successfully!", {
+        closeButton: false,
+        autoClose: 3000
+      });
+      setTimeout(() => {
+        navigate('/');
+      }, 3000);
+    } catch (err) {
+      setError(err.response.data.error);
+    }
+  };
+
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen bg-black-800">
+      <div className="p-12 bg-white rounded-2xl shadow-xl w-96">
+        <h2 className="text-3xl font-bold mb-6 text-gray-800">Register</h2>
+        <form onSubmit={register} className="space-y-6">
+          <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required 
+            className="w-full p-2 border border-gray-300 rounded-md" />
+          <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required 
+            className="w-full p-2 border border-gray-300 rounded-md" />
+          <input type="password" placeholder="Confirm Password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required 
+            className="w-full p-2 border border-gray-300 rounded-md" /> {/* Add this line */}
+          {error && <p className="text-red-500">{error}</p>}
+          <button type="submit" className="w-full p-2 bg-blue-600 text-white rounded-md">Register</button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+export default Register;
