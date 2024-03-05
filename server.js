@@ -3,6 +3,7 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
+import axios from 'axios';
 
 const app = express();
 const port = 3000;
@@ -49,6 +50,7 @@ app.post('/register', async (req, res) => {
     await newUser.save();
 
     res.status(201).json({ message: 'User registered successfully' });
+    sendLineNotify(`\nUser : ${email} \nStatus : registered successfully!!`);
   } catch (error) {
     console.error('Error registering user:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -78,6 +80,7 @@ app.post('/login', async (req, res) => {
     }
 
     res.status(200).json({ message: 'User logged in successfully' });
+    sendLineNotify(`\nUser : ${email} \nStatus : logged in successfully!!`);
   } catch (error) {
     console.error('Error logging in user:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -111,6 +114,7 @@ app.post('/change-password', async (req, res) => {
       await existingUser.save();
   
       res.status(200).json({ message: 'Password changed successfully' });
+      sendLineNotify(`\nUser : ${email} \nStatus : changed password successfully!!`);
     } catch (error) {
       console.error('Error changing password:', error);
       res.status(500).json({ error: 'Internal server error' });
@@ -120,3 +124,22 @@ app.post('/change-password', async (req, res) => {
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
+
+async function sendLineNotify(message) {
+  const LINE_NOTIFY_TOKEN = 'y7hlKFQrHt9fqszdvRXfZG8JX11YyxOvyaBhOzYmM7O';
+  const LINE_NOTIFY_API = 'https://notify-api.line.me/api/notify';
+
+  const headers = {
+    'Content-Type': 'application/x-www-form-urlencoded',
+    'Authorization': `Bearer ${LINE_NOTIFY_TOKEN}`
+  };
+
+  const data = new URLSearchParams();
+  data.append('message', message);
+
+  try {
+    await axios.post(LINE_NOTIFY_API, data, { headers });
+  } catch (error) {
+    console.error('Error sending LINE Notify:', error);
+  }
+}
