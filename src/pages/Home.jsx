@@ -1,5 +1,6 @@
 import React from 'react'
 import Carousel from '../components/Carousel'
+import Navbar from '../components/Navbar';
 
 const Home = () => {
   const images = [
@@ -8,9 +9,12 @@ const Home = () => {
     'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcST_v0565rZ2Qz6_zL3LUnRLODrAZionDSk8QS1ndi0AqJMvozsNYUVR_NQB6qbr-vf_vc&usqp=CAU',
   ];
   return (
-    <div className="container mx-auto mt-8">
-      <h1 className="text-2xl font-bold mb-4">React Carousel with Tailwind CSS</h1>
-      <Carousel images={images} />
+    <div>
+      <Navbar />
+      <div className="container mx-auto mt-8">
+        <h1 className="text-2xl font-bold mb-4">React Carousel with Tailwind CSS</h1>
+        <Carousel images={images} />
+      </div>
     </div>
   )
 }

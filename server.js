@@ -4,10 +4,12 @@ import cors from 'cors';
 import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
 import axios from 'axios';
+import jwt from 'jsonwebtoken';
 
 const app = express();
 const port = 3000;
 const saltRounds = 10;
+const jwtSecret = 'OvenKungSecretKey';
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -48,8 +50,8 @@ app.post('/register', async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, saltRounds);
     const newUser = new User({ email, password: hashedPassword });
     await newUser.save();
-
-    res.status(201).json({ message: 'User registered successfully' });
+    const token = jwt.sign({ username: newUser.email }, jwtSecret, { expiresIn: '1m' });
+    res.status(201).json({ message: 'User registered successfully', token: token});
     sendLineNotify(`\nUser : ${email} \nStatus : registered successfully!!`);
   } catch (error) {
     console.error('Error registering user:', error);
@@ -78,8 +80,8 @@ app.post('/login', async (req, res) => {
     if (!isMatch) {
       return res.status(400).json({ error: 'Password is incorrect' });
     }
-
-    res.status(200).json({ message: 'User logged in successfully' });
+    const token = jwt.sign({ username: existingUser.email }, jwtSecret, { expiresIn: '1m' });
+    res.status(200).json({ message: 'User logged in successfully', token: token }); // send token to client
     sendLineNotify(`\nUser : ${email} \nStatus : logged in successfully!!`);
   } catch (error) {
     console.error('Error logging in user:', error);
