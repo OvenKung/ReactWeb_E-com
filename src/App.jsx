@@ -5,6 +5,7 @@ import Loading from './pages/LoadingFirst'
 import Login from './pages/Login'
 import ChangePassword from './pages/Changepassword';
 import Home from './pages/Home';
+import Dashboard from './pages/Dashboard';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { AuthProvider } from './AuthProvider';
@@ -18,6 +19,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/changepassword" element={<ChangePassword />} />
           <Route path="/home" element={<Home />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/" element={<Loading />} />
         </Routes>
         <ToastContainer />

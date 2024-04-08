@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthProvider'; // import useAuth hook
 import { toast } from 'react-toastify';
 import jwt_decode from 'jwt-decode';
-import { set } from 'mongoose';
 
 
 const Navbar = () => {
@@ -34,7 +33,7 @@ const Navbar = () => {
       setIsLoggedIn(false); // set isLoggedIn to false if token does not exist
     }
   }, []);
-  
+
   useEffect(() => {
     setUsername(username); // log the username
   }, [username]);
@@ -44,32 +43,34 @@ const Navbar = () => {
   }
 
   return (
-    <nav className="bg-blue-600 py-2 px-6">
-      <div className="flex items-center justify-between">
-        <div className="text-white text-2xl">Logo</div>
-        <div>
-          <ul className="flex space-x-4">
-            {isLoggedIn ? (
-              <div className="relative inline-block text-left">
-                <div>
-                  <button type="button" className="text-white" onClick={toggleDropdown}>
-                    {username}
-                  </button>
-                </div>
-                {dropdownOpen && (
-                  <div className="origin-top-right absolute right-0 mt-2 w-40 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 divide-y divide-gray-100">
-                    <div className="py-1 text-center" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
-                      <button onClick={logout} className="block w-full px-4 py-2 text-sm text-gray-700 hover:bg-blue-100" role="menuitem">Logout</button>
-                      <Link to="/changepassword" className="block w-full px-4 py-2 text-sm text-gray-700 hover:bg-blue-100" role="menuitem">Change Password</Link>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <li><Link to="/login" className="text-white">Login</Link></li>
+    <nav className="navbar bg-white">
+      <div className="flex-1">
+        <a className="btn btn-ghost text-xl">Logo</a>
+      </div>
+      <div className="flex-none ml-20">
+        {isLoggedIn ? (
+          <div className="dropdown dropdown-end">
+            <div tabIndex={0} role="button" className="btn btn-ghost btn-circle flex items-center justify-end" onClick={toggleDropdown}>
+              {username}
+            </div>
+            {dropdownOpen && (
+              <ul tabIndex={0} className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-gray-500 rounded-box w-52">
+                <li>
+                  <button onClick={logout}>Logout</button>
+                </li>
+                <li>
+                  <Link to="/changepassword">Change Password</Link>
+                </li>
+              </ul>
             )}
-          </ul>
-        </div>
+          </div>
+        ) : (
+          <div className="dropdown dropdown-end">
+            <div tabIndex={0} role="button" className="btn btn-ghost btn-circle flex items-center justify-start">
+              <Link to="/login">Login</Link>
+            </div>
+          </div>
+        )}
       </div>
     </nav>
   );

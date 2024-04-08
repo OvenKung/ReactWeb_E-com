@@ -14,10 +14,7 @@ const jwtSecret = 'OvenKungSecretKey';
 app.use(cors());
 app.use(bodyParser.json());
 
-mongoose.connect('mongodb+srv://admin:admin@cluster0.mhh4jux.mongodb.net/Test', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
+mongoose.connect('mongodb+srv://admin:admin@cluster0.mhh4jux.mongodb.net/Test')
 .then(() => {
   console.log('MongoDB connected');
 })
@@ -28,6 +25,7 @@ mongoose.connect('mongodb+srv://admin:admin@cluster0.mhh4jux.mongodb.net/Test', 
 const User = mongoose.model('User', {
   email: String,
   password: String,
+  role: { type: String, default: 'user' }, // add role field with default value 'user'
 });
 
 app.post('/register', async (req, res) => {
@@ -48,9 +46,9 @@ app.post('/register', async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, saltRounds);
-    const newUser = new User({ email, password: hashedPassword });
+    const newUser = new User({ email, password: hashedPassword }); // role will be 'user' by default
     await newUser.save();
-    const token = jwt.sign({ username: newUser.email }, jwtSecret, { expiresIn: '1m' });
+    const token = jwt.sign({ username: newUser.email, role: newUser.role }, jwtSecret, { expiresIn: '1m' });
     res.status(201).json({ message: 'User registered successfully', token: token});
     sendLineNotify(`\nUser : ${email} \nStatus : registered successfully!!`);
   } catch (error) {
@@ -80,9 +78,14 @@ app.post('/login', async (req, res) => {
     if (!isMatch) {
       return res.status(400).json({ error: 'Password is incorrect' });
     }
-    const token = jwt.sign({ username: existingUser.email }, jwtSecret, { expiresIn: '1m' });
-    res.status(200).json({ message: 'User logged in successfully', token: token }); // send token to client
-    sendLineNotify(`\nUser : ${email} \nStatus : logged in successfully!!`);
+    const token = jwt.sign({ username: existingUser.email, role: existingUser.role }, jwtSecret, { expiresIn: '1m' });
+    if (existingUser.role === 'admin') {
+      res.status(200).json({ message: 'Admin logged in successfully', token: token }); // send token to client
+      sendLineNotify(`\nUser : ${email} \nStatus : logged in successfully!!`);
+    } else {
+      res.status(200).json({ message: 'User logged in successfully', token: token }); // send token to client
+      sendLineNotify(`\nUser : ${email} \nStatus : logged in successfully!!`);
+    }
   } catch (error) {
     console.error('Error logging in user:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -122,6 +125,27 @@ app.post('/change-password', async (req, res) => {
       res.status(500).json({ error: 'Internal server error' });
     }
 });
+
+app.get('/users', async (req, res) => {
+  try {
+    const users = await User.find({}, 'email');
+    res.status(200).json(users);
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+app.delete('/deleteusers/:id', async (req, res) => {
+  try {
+    await User.findByIdAndDelete(req.params.id);
+    res.status(200).json({ message: 'User deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting user:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);

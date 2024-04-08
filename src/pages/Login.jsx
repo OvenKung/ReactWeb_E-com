@@ -25,8 +25,19 @@ function Login() {
         closeButton: false,
         autoClose: 3000
       });
+  
+      // Decode the token to get the user's role
+      const decoded = jwt_decode(res.data.token);
+      const userRole = decoded.role;
+      console.log(userRole);
+  
+      // Navigate to the appropriate page based on the user's role
       setTimeout(() => {
-        navigate('/home');
+        if (userRole === 'admin') {
+          navigate('/dashboard');
+        } else {
+          navigate('/home');
+        }
       }, 3000);
     } catch (err) {
       if (err.response) {
